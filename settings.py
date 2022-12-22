@@ -1,4 +1,4 @@
-'''This module contains the gameplay settings'''
+"""This module contains the gameplay settings"""
 
 WARRIOR = "1"
 ROBBER = "2"

@@ -4,7 +4,7 @@ import logging
 import random
 
 import settings
-from exeptions import EnemyDown,GameOver
+from exeptions import EnemyDown, GameOver
 
 logger = logging.getLogger("Models")
 logger.setLevel(logging.INFO)
@@ -38,12 +38,12 @@ class Enemy:
         if self.health_point_enemy < settings.ENEMY_HEALTH_DOWN:
             raise EnemyDown(settings.MSG_ENEMYDOWN)
 
-        return self.health_point_enemy - 1
+        return self.health_point_enemy - settings.STEP_SCORE
 
     def select_attack(self):
         """Return a random attack choice from valid choices"""
 
-        variants_of_heroes = [1,2,3]
+        variants_of_heroes = [settings.WARRIOR, settings.ROBBER, settings.WIZARD]
         enemy_choice_attack = random.choice(variants_of_heroes)
         logger.info("Enemy chosen is %s", enemy_choice_attack)
         return enemy_choice_attack
@@ -51,7 +51,7 @@ class Enemy:
     def select_defence(self):
         """Return a random defence choice from valid choices"""
 
-        variants_of_heroes = [1, 2, 3]
+        variants_of_heroes = [settings.WARRIOR, settings.ROBBER, settings.WIZARD]
         enemy_choice_defence = random.choice(variants_of_heroes)
         logger.info("Enemy chosen is %s", enemy_choice_defence)
         return enemy_choice_defence
@@ -84,28 +84,26 @@ class Player:
         if self.health_point_player < settings.ENEMY_HEALTH_DOWN:
             raise GameOver(settings.MSG_GAMEOVER)
 
-    # add GameOver exception
-#
     def select_attack(self):
         """Return a fight choice made by the user"""
 
         player_choice_attack = None
-        while player_choice_attack not in [settings.WARRIOR,settings.ROBBER,settings.WIZARD]:
+        while player_choice_attack not in [settings.WARRIOR, settings.ROBBER, settings.WIZARD]:
             player_choice_attack = input(
                 'MAKE A FIGHT CHOISE FROM (WARRIOR - 1, ROBBER - 2, WIZARD - 3): '
             )
-        return int(player_choice_attack)
+        return player_choice_attack
 
     def select_defence(self):
         """	Return a fight choice made by the user"""
 
         player_choice_defence = None
 
-        while player_choice_defence not in [settings.WARRIOR,settings.ROBBER,settings.WIZARD]:
+        while player_choice_defence not in [settings.WARRIOR,  settings.ROBBER, settings.WIZARD]:
             player_choice_defence = input(
                 'MAKE A FIGHT CHOISE FROM (WARRIOR - 1, ROBBER - 2, WIZARD - 3): '
             )
-        return  int(player_choice_defence)
+        return player_choice_defence
 
     @staticmethod
     def fight(attack, defence):
@@ -113,9 +111,9 @@ class Player:
 
         if attack == defence:
             result = settings.DRAW
-        if attack == 1 and defence == 2\
-                or attack == 2 and defence == 3\
-                or attack == 3 and defence == 1:
+        if attack == settings.WARRIOR and defence == settings.ROBBER\
+                or attack == settings.ROBBER and defence == settings.WIZARD\
+                or attack == settings.WIZARD and defence == settings.WARRIOR:
             result = settings.SUCCESS
         else:
             result = settings.FAILURE
@@ -138,7 +136,7 @@ class Player:
                 self.add_score(settings.SCORE_FOR_DEFETING_THE_ENEMY)
                 raise
 
-        elif  fight_result == settings.FAILURE:
+        elif fight_result == settings.FAILURE:
             logger.info(settings.FAILURE_ATTACK)
             try:
                 self.decrease_health()
@@ -147,8 +145,7 @@ class Player:
                 logger.info('')
                 logger.info(settings.MSG_GAMEOVER)
                 raise
-
-        elif   fight_result == settings.DRAW:
+        elif fight_result == settings.DRAW:
             logger.info(settings.DRAW_MSG)
 
     def defence(self,  enemy: Enemy) -> None:
@@ -156,7 +153,7 @@ class Player:
 
         logger.info("Your defence!")
         defence = self.select_defence()
-        attack  = enemy.select_defence()
+        attack = enemy.select_defence()
         fight_result = self.fight(attack, defence)
 
         if fight_result == settings.SUCCESS:
@@ -165,10 +162,11 @@ class Player:
                 self.decrease_health()
                 logger.info('Your health is %s', self.health_point_player)
             except GameOver:
+                logger.info('')
                 logger.info(settings.MSG_GAMEOVER)
                 raise
 
-        elif  fight_result == settings.FAILURE:
+        elif fight_result == settings.FAILURE:
             logger.info(settings.SUCCESS_DEFENCE)
             try:
                 enemy.descrease_health()
@@ -178,5 +176,5 @@ class Player:
                 self.add_score(settings.SCORE_FOR_DEFETING_THE_ENEMY)
                 raise
 
-        elif   fight_result == settings.DRAW:
+        elif fight_result == settings.DRAW:
             logger.info(settings.DRAW_MSG)
